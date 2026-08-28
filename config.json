@@ -1,6 +1,6 @@
 {
   "name": "Omnibattery Hoymiles Bridge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "slug": "omnibattery_hoymiles_bridge",
   "description": "Bridge agnóstico para traducir datos MQTT (Victron, etc) a una emulación de protocolo Hoymiles para sistemas como Omnibattery.",
   "url": "https://github.com/abuawn/omnibattery-hoymiles-bridge",
