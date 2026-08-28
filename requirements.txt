@@ -1,0 +1,4 @@
+paho-mqtt==1.6.1
+PyYAML==6.0.1
+# protobuf==4.25.3  # Uncomment if parsing actual protobufs
+# hoymiles-wifi==0.1.0 # Reference library

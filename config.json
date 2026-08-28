@@ -1,0 +1,81 @@
+{
+  "name": "Omnibattery Hoymiles Bridge",
+  "version": "1.0.0",
+  "slug": "omnibattery_hoymiles_bridge",
+  "description": "Bridge agnóstico para traducir datos MQTT (Victron, etc) a una emulación de protocolo Hoymiles para sistemas como Omnibattery.",
+  "url": "https://github.com/abuawn/omnibattery-hoymiles-bridge",
+  "arch": ["aarch64", "amd64", "armhf", "armv7"],
+  "startup": "application",
+  "boot": "auto",
+  "init": false,
+  "options": {
+    "server": {
+      "host": "0.0.0.0",
+      "port": 10081,
+      "virtual_serial_number": "MSA-280024341346"
+    },
+    "mqtt": {
+      "broker": "core-mosquitto",
+      "port": 1883,
+      "username": "",
+      "password": "",
+      "client_id": "omnibattery_bridge"
+    },
+    "topics": {
+      "battery": {
+        "voltage": "victron/battery/258/Dc/0/Voltage",
+        "power": "victron/battery/258/Dc/0/Power",
+        "soc": "victron/battery/258/Soc",
+        "temperature": "victron/battery/258/Dc/0/Temperature"
+      },
+      "grid": {
+        "power_import": "victron/grid/30/Ac/Power",
+        "power_export": "victron/grid/30/Ac/Power"
+      },
+      "solar": {
+        "power": "victron/pvinverter/20/Ac/Power"
+      },
+      "load": {
+        "power": "victron/vebus/257/Ac/Out/L1/P"
+      }
+    }
+  },
+  "schema": {
+    "server": {
+      "host": "str",
+      "port": "port",
+      "virtual_serial_number": "str"
+    },
+    "mqtt": {
+      "broker": "str",
+      "port": "port",
+      "username": "str?",
+      "password": "password?",
+      "client_id": "str"
+    },
+    "topics": {
+      "battery": {
+        "voltage": "str",
+        "power": "str",
+        "soc": "str",
+        "temperature": "str"
+      },
+      "grid": {
+        "power_import": "str",
+        "power_export": "str"
+      },
+      "solar": {
+        "power": "str"
+      },
+      "load": {
+        "power": "str"
+      }
+    }
+  },
+  "ports": {
+    "10081/tcp": 10081
+  },
+  "ports_description": {
+    "10081/tcp": "Puerto del emulador TCP Hoymiles"
+  }
+}
