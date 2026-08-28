@@ -1,44 +1,13 @@
-# Configuración del Puente Omnibattery <-> Hoymiles
-
-# Configuración del servidor TCP de emulación Hoymiles
-server:
-  host: "0.0.0.0"
-  port: 10081
-  # Número de serie de la unidad a emular (inversor/batería)
-  # Debe tener un formato de Hoymiles válido, ej. MSA para la serie MS-A2 o DTU para un DTU
-  virtual_serial_number: "MSA-280024341346"
-
-# Configuración de conexión al broker MQTT
-mqtt:
-  # Si se ejecuta como add-on de Home Assistant, generalmente la IP es el propio HA
-  broker: "192.168.1.100" 
-  port: 1883
-  username: "mqtt_user"
-  password: "mqtt_password"
-  client_id: "omnibattery_bridge"
-
-# Mapeo de tópicos MQTT desde los cuales el puente leerá la información.
-# Ajusta los tópicos a los de tu instalación (Victron, Inversores, etc.)
 topics:
-  # Tópicos relacionados con la Batería
   battery:
-    voltage: "victron/battery/258/Dc/0/Voltage"        # Voltaje actual (V)
-    power: "victron/battery/258/Dc/0/Power"            # Potencia de carga/descarga (W)
-    soc: "victron/battery/258/Soc"                     # Estado de Carga (%)
-    temperature: "victron/battery/258/Dc/0/Temperature" # Temperatura (C)
-  
-  # Tópicos relacionados con el Medidor de Red (Grid)
+    voltage: "hoymiles/BATERIA_CASA_01/state/voltage"
+    power: "hoymiles/BATERIA_CASA_01/state/power"
+    soc: "hoymiles/BATERIA_CASA_01/state/soc"
+    temperature: "hoymiles/BATERIA_CASA_01/state/temperature"
   grid:
-    power_import: "victron/grid/30/Ac/Power"           # Potencia importada de la red (W)
-    power_export: "victron/grid/30/Ac/Power"           # Potencia exportada a la red (W) - Puede ser el mismo si usa valores negativos
-    
-  # Tópicos relacionados con producción Solar
+    power_import: "hoymiles/BATERIA_CASA_01/state/grid_import"
+    power_export: "hoymiles/BATERIA_CASA_01/state/grid_export"
   solar:
-    power: "victron/pvinverter/20/Ac/Power"            # Potencia de generación fotovoltaica (W)
-    
-  # Tópicos relacionados con el consumo de la vivienda (Load)
+    power: "hoymiles/BATERIA_CASA_01/state/solar"
   load:
-    power: "victron/vebus/257/Ac/Out/L1/P"             # Consumo total de la vivienda (W)
-
-# Frecuencia interna de actualización (segundos)
-update_interval: 5
+    power: "hoymiles/BATERIA_CASA_01/state/load"

@@ -1,90 +1,56 @@
 # Omnibattery Hoymiles Bridge
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Home Assistant Community Add-on](https://img.shields.io/badge/Home_Assistant-Add--on-blue.svg)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Home Assistant Add-on](https://img.shields.io/badge/Home%20Assistant-Add--on-blue.svg)](https://www.home-assistant.io/)
 
-Este repositorio contiene un middleware/puente agnóstico escrito en Python. Su objetivo es suscribirse a tópicos MQTT procedentes de cualquier sistema solar/batería (como Victron, inversores genéricos o contadores de red) y emular el comportamiento de un dispositivo de hardware Hoymiles a través de TCP/API.
+Este repositorio contiene un middleware/puente agnóstico escrito en Python. Su objetivo es suscribirse a tópicos MQTT procedentes de cualquier sistema solar/batería y **emular el comportamiento de un dispositivo de hardware Hoymiles MS-A2 a través de MQTT Discovery**.
 
-Este puente está diseñado para funcionar perfectamente como **nexo de unión** con el gestor energético [Omnibattery](https://github.com/ffunes/Omnibattery), permitiendo a instalaciones de diferentes marcas ser controladas como si fueran sistemas Hoymiles (ej. MS-A2 o HiBattery).
+Este puente está diseñado para funcionar perfectamente como **nexo de unión** con el gestor energético [Omnibattery](https://github.com/ffunes/Omnibattery), permitiendo a instalaciones de diferentes marcas ser controladas o visualizadas como si fueran sistemas Hoymiles (ej. MS-A2 o HiBattery).
 
 ## Arquitectura
 
-El puente funciona manteniendo un estado en memoria. Por un lado, se actualiza mediante un cliente MQTT y, por otro, sirve estos datos mediante un servidor TCP (basado en los conceptos de [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi)).
+El puente funciona inyectando mensajes de Autodescubrimiento (MQTT Discovery) en el broker de Home Assistant. Esto provoca que Home Assistant y Omnibattery crean que existe una batería física Hoymiles conectada a la red. El puente se encarga de escuchar los datos reales de tu sistema y traducirlos en tiempo real al formato que espera Omnibattery.
 
 ```mermaid
 graph TD
-    A[Inversor/Batería Victron o Genérico] -->|MQTT| B(Broker MQTT - ej. Mosquitto)
+    A[Inversor/Batería genérico] -->|MQTT| B(Broker MQTT - ej. Mosquitto)
     B -->|Suscripción Mapeada| C{Omnibattery Hoymiles Bridge}
-    C -->|Emulación Protocolo Hoymiles TCP| D[Omnibattery]
+    C -->|Emulación MQTT Discovery| D[Omnibattery]
 ```
 
-## Requisitos
+## Instalación como Add-on de Home Assistant
 
-- Un broker MQTT (ej. el Add-on Mosquitto de Home Assistant).
-- Los datos de tu sistema solar publicados en tópicos MQTT.
-- [Opcional] Entorno Home Assistant para instalar como Add-on local.
+1. Ve a **Ajustes > Complementos > Tienda de complementos**.
+2. Haz clic en los tres puntos arriba a la derecha y selecciona **Repositorios**.
+3. Añade la URL de este repositorio: `https://github.com/AbuAwn/omnibattery-hoymiles-bridge`
+4. Busca "Omnibattery Hoymiles Bridge" e instálalo.
+5. Inicia el Add-on y comprueba la pestaña de Registro (Logs).
 
-## Instalación
+## Configuración en Omnibattery
 
-### Método 1: Como Add-on Local en Home Assistant (Recomendado)
+1. Asegúrate de que el Add-on está iniciado y conectado al MQTT (revisa los logs).
+2. Ve a la configuración de Omnibattery en Home Assistant (Ajustes > Dispositivos > Añadir Integración > Omnibattery).
+3. Selecciona la marca **Hoymiles MQTT**.
+4. En el campo "ID de dispositivo MQTT", introduce exactamente: `MSA-280024341346` (Este es el número de serie virtual que genera el puente por defecto).
+5. Completa la configuración.
 
-1. En tu servidor de Home Assistant, navega a la carpeta `/addons`. (Puedes acceder mediante Samba Share, SSH o VSCode Add-on).
-2. Clona este repositorio o copia la carpeta `omnibattery-hoymiles-bridge` dentro de `/addons`.
-   ```bash
-   cd /addons
-   git clone https://github.com/abuawn/omnibattery-hoymiles-bridge.git
-   ```
-3. Ve a **Ajustes > Complementos** en Home Assistant.
-4. Haz clic en **Tienda de complementos**, luego en el menú de los 3 puntos (arriba a la derecha) y selecciona **Comprobar actualizaciones**.
-5. Busca "Omnibattery Hoymiles Bridge" al final de la lista, bajo "Local add-ons".
-6. Instala el Add-on, configura las opciones en la pestaña **Configuración** y dale a **Iniciar**.
+## Configuración de Tópicos (Mapeo)
 
-### Método 2: Standalone / Docker
+Para que el puente envíe datos reales a Omnibattery, debes configurar los `topics` en la pestaña **Configuración** del Add-on. 
+Por defecto, viene configurado para leer de tópicos de ejemplo como `hoymiles/BATERIA_CASA_01/...`. 
+Debes cambiar estas rutas por las rutas exactas donde tu sistema publica la información en tu broker MQTT.
 
-Si no usas Home Assistant o prefieres Docker puro, puedes compilarlo tú mismo.
-
-1. Clona el repositorio.
-2. Edita `config.yaml` mapeando los tópicos MQTT a tu instalación.
-3. Compila y ejecuta:
-   ```bash
-   docker build -t omnibattery-hoymiles-bridge .
-   docker run -d --name bridge \
-     -v $(pwd)/config.yaml:/usr/src/app/config.yaml \
-     -p 10081:10081 \
-     omnibattery-hoymiles-bridge
-   ```
-
-### Método 3: Python nativo
-
-1. Clona el repositorio e instala dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Edita `config.yaml`.
-3. Ejecuta:
-   ```bash
-   python main.py
-   ```
-
-## Configuración
-
-En la configuración (sea el archivo `config.yaml` o la UI de Home Assistant) deberás establecer:
-
-- **Broker MQTT**: IP, puerto, usuario y contraseña.
-- **Tópicos**: Deberás mapear exactamente en qué tópicos MQTT de tu instalación se publican variables como:
-  - `battery > voltage`
-  - `battery > power` (positivo carga, negativo descarga o viceversa)
-  - `battery > soc` (%)
-  - `grid > power_import` y `power_export`
-- **Emulador**: `virtual_serial_number`, con el formato de serie de la unidad que desees emular, ej. `MSA-280024341346`.
-
-## Agradecimientos y Atribuciones
-
-Este proyecto actúa como puente entre dos grandes proyectos open source de la comunidad. Mis agradecimientos y todo el crédito por la ingeniería inversa y el desarrollo de gestión a:
-
-- [ffunes/Omnibattery](https://github.com/ffunes/Omnibattery) - Por el sistema de gestión energética de destino.
-- [suaveolent/hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) - Por la librería de referencia y decodificación del protocolo Hoymiles.
-
-## Licencia
-
-Este proyecto está bajo licencia MIT. Ver archivo [LICENSE](LICENSE) para más detalles.
+Ejemplo de configuración:
+```yaml
+mqtt:
+  broker: core-mosquitto
+  port: 1883
+  username: tu_usuario_mqtt
+  password: tu_password_mqtt
+topics:
+  battery:
+    power: "hoymiles/BATERIA_CASA_01/state/power"
+    soc: "hoymiles/BATERIA_CASA_01/state/soc"
+    voltage: "hoymiles/BATERIA_CASA_01/state/voltage"
+    temperature: "hoymiles/BATERIA_CASA_01/state/temperature"
+```

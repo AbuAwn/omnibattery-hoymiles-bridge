@@ -23,20 +23,20 @@
     },
     "topics": {
       "battery": {
-        "voltage": "victron/battery/258/Dc/0/Voltage",
-        "power": "victron/battery/258/Dc/0/Power",
-        "soc": "victron/battery/258/Soc",
-        "temperature": "victron/battery/258/Dc/0/Temperature"
+        "voltage": "hoymiles/BATERIA_CASA_01/state/voltage",
+        "power": "hoymiles/BATERIA_CASA_01/state/power",
+        "soc": "hoymiles/BATERIA_CASA_01/state/soc",
+        "temperature": "hoymiles/BATERIA_CASA_01/state/temperature"
       },
       "grid": {
-        "power_import": "victron/grid/30/Ac/Power",
-        "power_export": "victron/grid/30/Ac/Power"
+        "power_import": "hoymiles/BATERIA_CASA_01/state/grid_import",
+        "power_export": "hoymiles/BATERIA_CASA_01/state/grid_export"
       },
       "solar": {
-        "power": "victron/pvinverter/20/Ac/Power"
+        "power": "hoymiles/BATERIA_CASA_01/state/solar"
       },
       "load": {
-        "power": "victron/vebus/257/Ac/Out/L1/P"
+        "power": "hoymiles/BATERIA_CASA_01/state/load"
       }
     }
   },
