@@ -36,8 +36,13 @@ def main():
     mqtt_client.start()
     
     try:
+        last_heartbeat = time.time()
         while True:
-            # Mantener vivo el hilo principal
+            # Omnibattery needs to see frequent MQTT messages during config flow
+            # to verify the battery is alive. Publish state every 5 seconds.
+            if time.time() - last_heartbeat > 5.0:
+                mqtt_client._publish_state()
+                last_heartbeat = time.time()
             time.sleep(1)
     except KeyboardInterrupt:
         logger.info("Shutting down...")
